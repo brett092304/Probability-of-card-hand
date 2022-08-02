@@ -2,6 +2,7 @@
 
 #include <stdio.h>
 #include <iostream>
+#include <fstream>
 #include <thread>
 #include <cmath>
 #include <ctime>
