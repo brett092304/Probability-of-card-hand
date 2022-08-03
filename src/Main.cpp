@@ -9,7 +9,7 @@ void App::resetFile(std::string fileName)
     file.close();
 }
 
-void App::ComputeHands(std::string fileName, Deck deck, int start, int end, int *handcount)
+void App::ComputeHands(std::string fileName, Deck deck, int start, int end, long *handCount)
 {
     std::deque<std::vector<Card>> hands = {};
     std::vector<Card> hand = {};
@@ -33,24 +33,38 @@ void App::ComputeHands(std::string fileName, Deck deck, int start, int end, int 
                         counter++;
                         if (counter > 4)
                         {
-                            hands.push_back(hand);
-                            hand.clear();
-                            counter = 0;
-                            for (int a = 0; a < hands.at(hands.size() -1).size(); a++)
+                            while(hand.size() > 5)
                             {
-                                std::cout << hands.at(hands.size() -1).at(a).getCard() << std::endl;
+                                hand.front() = hand.back();
+                                hand.pop_back();
                             }
-                            std::cout << "\n";
-                            *handcount++;
+                            bool handMatches = false;
+                            for (int z = 0; z < hands.size(); z++)
+                            {
+                                if (Hand::isEqual(hand, hands.at(z)))
+                                {
+                                    handMatches = true;
+                                    hand.clear();
+                                    counter = 0;
+                                    break;
+                                }
+                            }
+                            if (!handMatches)
+                            {
+                                hands.push_back(hand);
+                                hand.clear();
+                                counter = 0;
+                                *handCount++;
+                                /*for (int a = 0; a < hands.at(hands.size() -1).size(); a++)
+                                {
+                                    std::cout << hands.at(hands.size() -1).at(a).getCard() << std::endl;
+                                }
+                                std::cout << "\n";*/
+                            }
                         }
                     }
                 }
             }
-        }
-        while(hands.at(0).size() > 6)
-        {
-            hands.at(0).front() = hands.at(0).back();
-            hands.at(0).pop_back();
         }
         std::ofstream file;
         file.open(fileName, std::ios_base::app);
@@ -77,36 +91,77 @@ int main()
     Deck deck(ranks, suits, values);
 
     deck.printDeck();
+    std::cout << "Current Deck" << std::endl;
     std::cout << deck.getDeck().size() << std::endl;
+    std::this_thread::sleep_for(std::chrono::seconds(2));
 
-    App::resetFile("handoutput1.txt");
-    App::resetFile("handoutput2.txt");
-    App::resetFile("handoutput3.txt");
-    App::resetFile("handoutput4.txt");
+    unsigned int numThreads = std::thread::hardware_concurrency();
 
-    int *count1 = new int;
-    int *count2 = new int;
-    int *count3 = new int;
-    int *count4 = new int;
+    for (int i = 0; i < numThreads; i++)
+    {
+        App::resetFile("handoutput" + std::to_string(i) + ".txt");
+    }
 
-    std::thread compute1(App::ComputeHands, "handoutput1.txt", deck, 0, 13, count1);
-    std::thread compute2(App::ComputeHands, "handoutput2.txt", deck, 14, 27, count2);
-    std::thread compute3(App::ComputeHands, "handoutput3.txt", deck, 28, 41, count3);
-    std::thread compute4(App::ComputeHands, "handoutput4.txt", deck, 42, 52, count4);
+    std::cout << "generated Files" << std::endl;
+    std::this_thread::sleep_for(std::chrono::seconds(1));
 
-    compute1.join();
-    compute2.join();
-    compute3.join();
-    compute4.join();
+    //create pointers for keeping track of number of hands
+    std::vector<long*> handcounts;
 
-    int totalHands = *count1 + *count2 + *count3 + *count4;
-    delete count1;
-    delete count2;
-    delete count3;
-    delete count4;
+    for (int i = 0; i < numThreads; i++)
+    {
+        handcounts.emplace_back(new long);
+    }
+
+    //generate threads to compute hands
+    std::vector<std::thread> threadPool;
+    threadPool.reserve(numThreads);
+
+    int amountofCardsperThread = deck.getDeck().size() / numThreads;
+    int startingPlace = 0;
+
+    for (auto i = 0; i < numThreads; i++)
+    {
+        std::string filename = "handoutput" + std::to_string(i) + ".txt";
+        if (i == numThreads -1)
+        {
+            threadPool.emplace_back(std::thread(App::ComputeHands, filename, deck, startingPlace, deck.getDeck().size(), handcounts.at(i)));
+        }
+        else
+        {
+            threadPool.emplace_back(std::thread(App::ComputeHands, filename, deck, startingPlace, startingPlace + amountofCardsperThread, handcounts.at(i)));
+        }
+        startingPlace += amountofCardsperThread + 1;
+    }
+
+    std::cout << "Generating Hands" << std::endl;
+    std::this_thread::sleep_for(std::chrono::seconds(2));
+
+    for (auto &t : threadPool)
+    {
+        t.join();
+    }
+
+    long totalHandCount = 0;
+    for (auto &count : handcounts)
+    {
+        totalHandCount += *count;
+    }
+
+    for (auto &count : handcounts)
+    {
+        delete count;
+    }
 
     std::cout << "success" << std::endl;
-    std::cout << totalHands << " amount of hands" << std::endl;
+    std::cout << totalHandCount << " total Hand Counts" << std::endl;
+    std::cout << "Would you like to clean up temporary files (Y/n)";
+    char cleanTempFiles;
+    std::cin >> cleanTempFiles;
+    if (cleanTempFiles != tolower('n') || cleanTempFiles == NULL)
+    {
+        std::system("rm *.txt");
+    }
 
     return 0;
 }
