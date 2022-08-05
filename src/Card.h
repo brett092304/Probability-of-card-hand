@@ -5,6 +5,7 @@ class Card
 {
     public:
         Card(std::string rank, std::string suit, int value);
+        Card();
         std::string getCard();
 
     private:

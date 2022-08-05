@@ -7,7 +7,9 @@ Card::Card(std::string rank, std::string suit, int value)
     this->value = value;
 }
 
+Card::Card(){}
+
 std::string Card::getCard()
 {
-    return this->rank + " of " + this->suit + " Value = " + std::to_string(this->value);
+    return rank + " " + suit + " " + std::to_string(value);
 }

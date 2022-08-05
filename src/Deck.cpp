@@ -9,6 +9,12 @@ Deck::Deck(std::vector<std::string> ranks, std::vector<std::string> suits, std::
             deck.push_back(Card(ranks[i], suits[j], values[i]));
         }
     }
+    deckSize = deck.size();
+}
+
+Deck::Deck(std::vector<Card> cards)
+{
+    deck = cards;
 }
 
 std::vector<Card> Deck::getDeck()
@@ -22,4 +28,34 @@ void Deck::printDeck()
     {
         std::cout << deck.at(i).getCard() << std::endl;
     }
+}
+
+Card Deck::dealCard()
+{
+    deck.front() = deck.back();
+    deckSize--;
+}
+
+int Deck::getSize()
+{
+    return deckSize;
+}
+
+bool Deck::isEmpty()
+{
+    if (deckSize <= 0)
+    {
+        return true;
+    }
+    return false;
+}
+
+void Deck::refill()
+{
+    deckSize = deck.size();
+}
+
+void Deck::empty()
+{
+    deckSize = 0;
 }
