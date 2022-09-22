@@ -26,13 +26,57 @@ bool Hand::isEqual(std::vector<Card> hand1, std::vector<Card> hand2)
     return handMatches;
 }
 
+bool Hand::isExact(std::vector<Card> hand1, std::vector<Card> hand2)
+{
+    bool isExact = false;
+    if (hand1.size() == hand2.size())
+    {
+        for (int i = 0; i < hand1.size(); i++)
+        {
+            if (hand1.at(i).getCard() == hand2.at(i).getCard())
+            {
+                isExact = true;
+            }
+            else
+            {
+                isExact = false;
+                return isExact;
+            }
+        }
+    }
+    return isExact;
+}
+
+bool Hand::hasDuplicates(std::vector<Card> hand)
+{
+    bool duplicate = false;
+    int matchesfound = 0;
+    for (int i = 0; i < hand.size(); i++)
+    {
+        for (int j = 0; j < hand.size(); j++)
+        {
+            if (hand.at(i).getCard() == hand.at(j).getCard())
+            {
+                matchesfound++;
+            }
+            if (matchesfound > 1)
+            {
+                duplicate = true;
+                return duplicate;
+            }
+        }
+        matchesfound = 0;
+    }
+    return duplicate;
+}
+
 void Hand::addHand(std::vector<Card> &hand, std::deque<std::vector<Card>> &hands, int &count, int &counter, int cardsPerHand)
 {
-    while(hand.size() > cardsPerHand)
+    /*while(hand.size() > cardsPerHand)
     {
         hand.front() = hand.back();
         hand.pop_back();
-    }
+    }*/
     bool handMatches = false;
     /*for (int z = 0; z < hands.size(); z++)
     {

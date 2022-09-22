@@ -10,11 +10,14 @@ Deck::Deck(std::vector<std::string> ranks, std::vector<std::string> suits, std::
         }
     }
     deckSize = deck.size();
+    deckiter = deck.begin();
 }
 
 Deck::Deck(std::vector<Card> cards)
 {
     deck = cards;
+    deckSize = deck.size();
+    deckiter = deck.begin();
 }
 
 std::vector<Card> Deck::getDeck()
@@ -32,8 +35,19 @@ void Deck::printDeck()
 
 Card Deck::dealCard()
 {
-    deck.front() = deck.back();
     deckSize--;
+    if (deckiter != deck.end())
+    {
+        Card temp = *deckiter;
+        deckiter++;
+        return temp;
+    }
+}
+
+Card Deck::fakeDeal()
+{
+    if (deckiter != deck.end())
+        return *deckiter;
 }
 
 int Deck::getSize()
@@ -53,6 +67,7 @@ bool Deck::isEmpty()
 void Deck::refill()
 {
     deckSize = deck.size();
+    deckiter = deck.begin();
 }
 
 void Deck::empty()

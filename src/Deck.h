@@ -10,6 +10,7 @@ class Deck
         std::vector<Card> getDeck();
         void printDeck();
         Card dealCard();
+        Card fakeDeal();
         bool isEmpty();
         void refill();
         void empty();
@@ -18,5 +19,6 @@ class Deck
     private:
         std::vector<Card> deck;
         int deckSize;
+        std::vector<Card>::iterator deckiter;
 
 };
