@@ -107,12 +107,15 @@ void App::analyzeHands(std::deque<std::vector<Card>> &hands, int start, int end,
     std::deque<float> timesHandAppears;
     timesHandAppears.push_back(1);
     auto handAppearedIt = timesHandAppears.end();
+    auto handAnalyzeIter = hands.begin();
+    auto handAnalyzeIterEnd = hands.begin();
+    std::advance(handAnalyzeIterEnd, end);
 
-    for (int j = start; j < end; j++)
+    for (std::advance(handAnalyzeIter, start); handAnalyzeIter != handAnalyzeIterEnd; handAnalyzeIter++)
     {
-        for (int k = 0; k < hands.size(); k++)
+        for (auto handAnalyzeIterFull = hands.begin(); handAnalyzeIterFull != hands.end(); handAnalyzeIterFull++)
         {
-            if (Hand::isEqual(hands.at(j), hands.at(k)))
+            if (Hand::isEqual(*handAnalyzeIter, *handAnalyzeIterFull))
             {
                 *handAppearedIt++;
                 timesHandAppears.push_back(-1);
@@ -132,14 +135,21 @@ void App::analyzeHands(std::deque<std::vector<Card>> &hands, int start, int end,
 
     std::ofstream outfile;
     outfile.open("finaloutput" + std::to_string(fileNum) + ".txt");
-    for (int i = start; i < end; i++)
+    auto handIter = hands.begin();
+    auto handEnd = hands.begin();
+    std::advance(handEnd, end);
+    int i = start;
+    for (std::advance(handIter, start); handIter != handEnd; handIter++)
     {
         outfile << "Probability: " + std::to_string(timesHandAppears.at(i)) << std::endl;
-        for (int j = 0; j < hands.at(i).size(); j++)
+        for (int j = 0; j < handIter->size(); j++)
         {
-            outfile << hands.at(i).at(j).getCard() << std::endl;
+            outfile << handIter->at(j).getCard() << std::endl;
+            //std::cout << handIter->at(j).getCard() << std::endl;
         }
         outfile << "\n";
+        //std::cout << "\n";
+        i++;
     }
     outfile.close();
 }
@@ -154,7 +164,7 @@ int main()
     std::cout << "Hand Size: ";
     std::cin >> handSize;
 
-    int numThreads = 6; //std::thread::hardware_concurrency();
+    int numThreads = 4; //std::thread::hardware_concurrency();
 
     Deck standardDeck(ranks, suits, values);
 
